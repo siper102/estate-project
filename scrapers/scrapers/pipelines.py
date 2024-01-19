@@ -14,7 +14,6 @@ from scrapers.validators import Estate as EstateModel
 
 
 class ValidationPipeline:
-
     def __init__(self):
         self.errors_file = self._create_validation_file()
         self.errors = []
@@ -58,7 +57,6 @@ class ValidationPipeline:
 
 
 class DatabasePipeline:
-
     def __init__(self):
         self.engine = get_engine()
         self.session_maker = sessionmaker(bind=self.engine, autoflush=False)
@@ -76,10 +74,7 @@ class DatabasePipeline:
         estate_item = ItemAdapter(item=item)
         price_item = estate_item.pop("price_item")
         with self.session_maker.begin() as session:
-            estate_orm = self.get_estate_orm(
-                estate_item=estate_item,
-                session=session
-            )
+            estate_orm = self.get_estate_orm(estate_item=estate_item, session=session)
             price_orm = Price(**price_item)
             estate_orm.price.append(price_orm)
             session.add(estate_orm)
@@ -99,4 +94,3 @@ class DatabasePipeline:
         if not estate_orm:
             estate_orm = Estate(**estate_item.asdict())
         return estate_orm
-

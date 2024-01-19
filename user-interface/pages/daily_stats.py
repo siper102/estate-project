@@ -12,6 +12,7 @@ def get_engine():
     engine = create_engine(URL.create(**parser["DATABASE"]))
     return engine
 
+
 def read_data():
     engine = get_engine()
     query = """
@@ -24,7 +25,4 @@ def read_data():
 
 data = read_data()
 
-st.line_chart(
-    data=data,
-    y=["mean_price"]
-)
+st.line_chart(data=data, y=["mean_price"])

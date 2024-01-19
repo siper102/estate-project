@@ -36,11 +36,7 @@ def get_district_information(replace_umlaut=False) -> Generator:
     reader = DictReader(buff)
     for row in reader:
         if replace_umlaut:
-            dictionary = {
-                ord("ä"): "ae",
-                ord("ö"): "oe",
-                ord("ü"): "ue"
-            }
+            dictionary = {ord("ä"): "ae", ord("ö"): "oe", ord("ü"): "ue"}
             row["district_name"] = row["district_name"].translate(dictionary)
         yield row
 
@@ -58,5 +54,6 @@ def get_engine():
         create_database(engine.url)
     Base.metadata.create_all(engine, checkfirst=True)
     return engine
+
 
 print(read_credentials("DATABASE"))

@@ -5,7 +5,6 @@ from scrapers.items import EstateItem, PriceItem
 import re
 
 
-
 class WohnungsboerseScraperSpider(scrapy.Spider):
     name = "wohnungsboerse-scraper"
     allowed_domains = ["www.wohnungsboerse.net"]
@@ -23,21 +22,21 @@ class WohnungsboerseScraperSpider(scrapy.Spider):
                 "is_rendite": "0",
                 "zipcode_city": "Duesseldorf",
                 "term": "Duesseldorf",
-                "districts[]": di["district_name"]
+                "districts[]": di["district_name"],
             }
             yield scrapy.Request(
                 url=f"{self.base_url}/{path}?{urlencode(query)}",
                 callback=self.parse,
-                cb_kwargs={"di": di}
+                cb_kwargs={"di": di},
             )
 
     def parse(self, response, di):
-        links = response.xpath("//section[contains(@class, 'search_result_container')]/a/@href").getall()
+        links = response.xpath(
+            "//section[contains(@class, 'search_result_container')]/a/@href"
+        ).getall()
         for link in links:
             yield scrapy.Request(
-                url=link,
-                callback=self.parse_estate,
-                cb_kwargs={"di": di}
+                url=link, callback=self.parse_estate, cb_kwargs={"di": di}
             )
 
     def parse_estate(self, response, di):
@@ -47,10 +46,18 @@ class WohnungsboerseScraperSpider(scrapy.Spider):
         address = response.xpath("//div[@class='pl-4 md:pl-5 w-52']/text()").getall()
         street, postal_code = self.extract_location_information(address)
         price = response.xpath("//meta[@itemprop='price']/@content").get()
-        rooms = response.xpath("//div[@itemprop='numberOfRooms']/meta[@itemprop='value']/@content").get()
-        size = response.xpath("//div[@itemprop='floorSize']/meta[@itemprop='value']/@content").get()
-        lat = response.xpath("//div[@itemprop='geo']/meta[@itemprop='latitude']/@content").get()
-        lon = response.xpath("//div[@itemprop='geo']/meta[@itemprop='longitude']/@content").get()
+        rooms = response.xpath(
+            "//div[@itemprop='numberOfRooms']/meta[@itemprop='value']/@content"
+        ).get()
+        size = response.xpath(
+            "//div[@itemprop='floorSize']/meta[@itemprop='value']/@content"
+        ).get()
+        lat = response.xpath(
+            "//div[@itemprop='geo']/meta[@itemprop='latitude']/@content"
+        ).get()
+        lon = response.xpath(
+            "//div[@itemprop='geo']/meta[@itemprop='longitude']/@content"
+        ).get()
         estate_id = response.url.split("/")[-1]
 
         t = response.xpath("//table[@class='w-full [&_td]:py-2 mt-4']//text()").getall()
@@ -62,9 +69,7 @@ class WohnungsboerseScraperSpider(scrapy.Spider):
             construction_year = None
 
         price_item = PriceItem(
-            price=price,
-            source="Wohnungsboerse",
-            estate_id=estate_id
+            price=price, source="Wohnungsboerse", estate_id=estate_id
         )
         estate_item = EstateItem(
             estate_id=estate_id,
@@ -78,7 +83,7 @@ class WohnungsboerseScraperSpider(scrapy.Spider):
             street=street,
             lat=lat,
             lon=lon,
-            construction_year=construction_year
+            construction_year=construction_year,
         )
 
         yield estate_item
@@ -91,7 +96,3 @@ class WohnungsboerseScraperSpider(scrapy.Spider):
             street = ""
             postal_code = address[0].split()[0]
         return street, postal_code
-
-
-
-

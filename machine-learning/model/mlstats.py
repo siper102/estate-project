@@ -1,12 +1,4 @@
-from sqlalchemy import (
-    BigInteger,
-    Column,
-    DateTime,
-    String,
-    Integer,
-    Float,
-    Boolean
-)
+from sqlalchemy import BigInteger, Column, DateTime, String, Integer, Float, Boolean
 from sqlalchemy.orm import declarative_base
 from datetime import datetime
 

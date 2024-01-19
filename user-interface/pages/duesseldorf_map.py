@@ -14,14 +14,18 @@ def get_engine():
     engine = create_engine(URL.create(**parser["DATABASE"]))
     return engine
 
+
 def read_geo_json():
     url = "https://opendata.duesseldorf.de/sites/default/files/Stadtteilgrenzen%20Düsseldorf%202021%20ETRS89.geojson"
     r = requests.get(url)
 
-    geo_df = gpd.read_file(r.text, driver="GeoJSON").drop(
-        columns=["Quelle_Ein", "Stand_Gren", "Stadtbezir", "Stadtteilc"]
-    ).rename(columns={"Stadtteil": "district_number"})
+    geo_df = (
+        gpd.read_file(r.text, driver="GeoJSON")
+        .drop(columns=["Quelle_Ein", "Stand_Gren", "Stadtbezir", "Stadtteilc"])
+        .rename(columns={"Stadtteil": "district_number"})
+    )
     return geo_df
+
 
 def read_data():
     engine = get_engine()
@@ -43,26 +47,32 @@ m = folium.Map(
     zoom_start=10,
     zoom_control=False,
     scrollWheelZoom=False,
-    dragging=False
+    dragging=False,
 )
 
 choropleth = folium.Choropleth(
     geo_data=merged,
-    name='choropleth',
+    name="choropleth",
     data=data,
-    columns=['district_number', 'price'],
-    key_on='feature.properties.district_number',
-    fill_color='Spectral',
+    columns=["district_number", "price"],
+    key_on="feature.properties.district_number",
+    fill_color="Spectral",
     fill_opacity=0.6,
     nan_fill_opacity=0,
     line_opacity=1,
-    legend_name='Mean Price'
+    legend_name="Mean Price",
 ).add_to(m)
 
 choropleth.geojson.add_child(
     folium.features.GeoJsonTooltip(
-        fields=['district_number', 'Name', "price", "rooms", "price_per_qm"],
-        aliases=['District Number:', 'District Name:', "Average Price", "Average Rooms", "Average Price per square metre"],
+        fields=["district_number", "Name", "price", "rooms", "price_per_qm"],
+        aliases=[
+            "District Number:",
+            "District Name:",
+            "Average Price",
+            "Average Rooms",
+            "Average Price per square metre",
+        ],
         labels=True,
         localize=True,
         sticky=False,
@@ -71,7 +81,7 @@ choropleth.geojson.add_child(
         border: 2px solid black;
         border-radius: 3px;
         box-shadow: 3px;
-        """
+        """,
     )
 )
 

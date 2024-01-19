@@ -19,7 +19,7 @@ class EstateInput(BaseModel):
     @classmethod
     def validate_district_name(cls, v):
         if v not in get_district_names():
-            raise ValueError('No valid district name given')
+            raise ValueError("No valid district name given")
         return v
 
 
@@ -32,8 +32,7 @@ tree = bentoml.Service("estate_fastapi_demo", runners=[regression_runner])
 
 
 @tree.api(
-    input=JSON(pydantic_model=EstateInput),
-    output=JSON(pydantic_model=EstateOutput)
+    input=JSON(pydantic_model=EstateInput), output=JSON(pydantic_model=EstateOutput)
 )
 def predict(input_series: EstateInput) -> EstateOutput:
     result = regression_runner.run(input_series.model_dump())

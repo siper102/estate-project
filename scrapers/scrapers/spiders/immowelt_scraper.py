@@ -19,12 +19,12 @@ class ImmoweltScraperSpider(scrapy.Spider):
                 "lon": di["lon"],
                 "sort": "relevanz distance",
                 "sr": "3",
-                "version": "v2"
+                "version": "v2",
             }
             yield scrapy.Request(
                 url=f"{self.base_url}/{path}?{urlencode(query)}",
                 callback=self.parse,
-                cb_kwargs={"di": di}
+                cb_kwargs={"di": di},
             )
 
     def parse(self, response, di):
@@ -41,7 +41,9 @@ class ImmoweltScraperSpider(scrapy.Spider):
             rooms = key_facts.xpath("div[@data-test='rooms']/text()").get()
             display_name = fact_section.xpath("div/div/h2/text()").get()
 
-            estate_facts = fact_section.xpath("div/div/div[contains(@class, 'estateFacts')]")
+            estate_facts = fact_section.xpath(
+                "div/div/div[contains(@class, 'estateFacts')]"
+            )
             location = estate_facts.xpath("div/span/text()").get()
 
             if di["district_name"].lower() in location.lower():
@@ -49,7 +51,7 @@ class ImmoweltScraperSpider(scrapy.Spider):
                     price=price.replace(".", "").replace(",", ".").replace(" €", ""),
                     scraped_at=datetime.now(),
                     source="Immowelt",
-                    estate_id=estate_id
+                    estate_id=estate_id,
                 )
                 estate_item = EstateItem(
                     estate_id=estate_id,
@@ -59,14 +61,13 @@ class ImmoweltScraperSpider(scrapy.Spider):
                     display_name=display_name,
                     location=di["district_number"],
                     price_item=price_item,
-                    construction_year=None
+                    construction_year=None,
                 )
                 yield scrapy.Request(
                     url=link,
                     callback=self.parse_estate,
-                    cb_kwargs={"item": estate_item}
+                    cb_kwargs={"item": estate_item},
                 )
-
 
     def _extract_float(self, result):
         if result:
@@ -79,10 +80,14 @@ class ImmoweltScraperSpider(scrapy.Spider):
         location_information = response.xpath(
             "//app-estate-address/div/sd-cell/sd-cell-row/sd-cell-col[@class='cell__col is-center-v']"
         )
-        street = location_information.xpath("span[@data-cy='address-street']/text()").get()
+        street = location_information.xpath(
+            "span[@data-cy='address-street']/text()"
+        ).get()
         if "nicht freigegeben" in street:
             street = None
-        address_information = location_information.xpath("span[@data-cy='address-city']")
+        address_information = location_information.xpath(
+            "span[@data-cy='address-city']"
+        )
         place = address_information.xpath("div[1]/text()").get()
         postal_code = re.search("[0-9]{5}", place)[0]
 
@@ -94,5 +99,3 @@ class ImmoweltScraperSpider(scrapy.Spider):
         item["postal_code"] = postal_code
         item["street"] = street
         yield item
-
-

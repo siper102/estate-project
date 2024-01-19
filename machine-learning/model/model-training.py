@@ -46,10 +46,7 @@ def extract_data(engine):
     SELECT *
     FROM ml_training_data;
     """
-    df = pd.read_sql_query(
-        sql=query,
-        con=engine
-    )
+    df = pd.read_sql_query(sql=query, con=engine)
     df = df.dropna()
     return df
 
@@ -75,10 +72,9 @@ def create_model(X: list, y: pd.Series) -> Pipeline:
     :param y: The target variables
     :return: The fitted model
     """
-    pipeline = Pipeline([
-        ("transformer", DictVectorizer()),
-        ("forrest", RandomForestRegressor())
-    ])
+    pipeline = Pipeline(
+        [("transformer", DictVectorizer()), ("forrest", RandomForestRegressor())]
+    )
     pipeline.fit(X=X, y=y)
     return pipeline
 
@@ -98,6 +94,7 @@ def get_latest_model_stats(engine):
             return latest_mse, latest_tag
     return inf, None
 
+
 def evaluate_model(model, X_train, y_train, X_test, y_test):
     """
     Calculate the R^{2} score for training and test data and the MSE
@@ -115,6 +112,7 @@ def evaluate_model(model, X_train, y_train, X_test, y_test):
     mse_train = mean_squared_error(y_pred, y_test, squared=False)
     return train_score, test_score, mse_train
 
+
 def persist_stats(stats, engine):
     """
     Save the stats for this training session
@@ -124,7 +122,6 @@ def persist_stats(stats, engine):
     with Session(engine) as session:
         session.add(stats)
         session.commit()
-
 
 
 if __name__ == "__main__":
@@ -148,21 +145,14 @@ if __name__ == "__main__":
 
     # calculate metrics
     train_score, test_score, mse_train = evaluate_model(
-        model=model,
-        X_train=X_train,
-        y_train=y_train,
-        X_test=X_test,
-        y_test=y_test
+        model=model, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test
     )
     # Get latest MSE to compare the two models
     latest_mse, model_tag = get_latest_model_stats(engine)
 
     # If the MSE decreased use the new model in production
     if mse_train < latest_mse:
-        saved_model = save_model(
-            name=MODEL_NAME,
-            model=model
-        )
+        saved_model = save_model(name=MODEL_NAME, model=model)
         in_production = True
         model_tag = saved_model.tag
         logger.info(f"New model {saved_model} in production")
@@ -179,9 +169,7 @@ if __name__ == "__main__":
         in_production=in_production,
         train_size=len(X_train),
         test_size=len(X_test),
-        training_time=stop-start
+        training_time=stop - start,
     )
     persist_stats(stats, engine)
     logger.info("Stats persisted")
-
-
