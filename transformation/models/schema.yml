@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: daily_mean
+    description: Average prices for each date of scraping
+    columns:
+      - name: date
+        description: Date of scraping
+        test:
+          - unique
+          - not_null
+      - name: price
+        description: The average price of the day
+  - name: estates_with_prices
+    description: Information about estates with prices
+    columns:
+      - name: postal_code
+        description: Postal code of estate
+        test:
+          - match_regex
+      - name: street
+        description: Street of estate
+      - name: district_name
+        description: ID of district where estate is
+      - name: rooms
+        description: Number of rooms
+      - name: area
+        description: Area in square metres
+      - name: link
+        description: Where the information were found
+      - name: price
+        description: monthly rent for flat
+      - name: scraped_at
+        description: When the information were scraped
+      - name: source
+        description: Provider of information
+
