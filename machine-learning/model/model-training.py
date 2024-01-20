@@ -1,21 +1,20 @@
-from bentoml.sklearn import save_model
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.pipeline import Pipeline
-from sklearn.feature_extraction import DictVectorizer
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error
+import logging
+from configparser import ConfigParser
 from math import inf
 from time import time
-import logging
 
 import pandas as pd
-from sqlalchemy import create_engine, func
-from sqlalchemy.orm import Session
-from sqlalchemy.engine.url import URL
-from sqlalchemy_utils import create_database, database_exists
-from configparser import ConfigParser
+from bentoml.sklearn import save_model
 from mlstats import Base, MlStats
-
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.feature_extraction import DictVectorizer
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sqlalchemy import create_engine, func
+from sqlalchemy.engine.url import URL
+from sqlalchemy.orm import Session
+from sqlalchemy_utils import create_database, database_exists
 
 MODEL_NAME = "estate-regressor"
 logger = logging.getLogger(__name__)

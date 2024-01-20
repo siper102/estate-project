@@ -4,12 +4,12 @@ I created this project to create a feeling on how a data driven system could loo
 into some frameworks and what are possible problems that I can possibly run into during the development of a data system.
 
 The goal of this system is to continuously scrape data about rental prices in the german city duesseldorf and save this data in a database.
-Then it should make this data available and with the resulting dataset it should be possible to see the latest trends and regional differences 
+Then it should make this data available and with the resulting dataset it should be possible to see the latest trends and regional differences
 between the districts. Also, a machine learning model is trained with the data to make predictions.
 
 The resulting project is:
 1. fully automized: every part of this project can be easily scheduled via any orchestrator like Apache Airflow
-2. scalable: each component runs in an own microservice and each part can be scaled up and down 
+2. scalable: each component runs in an own microservice and each part can be scaled up and down
 
 # Path of a data point from extraction to analysis
 
@@ -26,7 +26,7 @@ Since the resulting database has just two tables this step is not necessary. But
 In this project I decided to make the data available with views that are created with [DBT](https://www.getdbt.com).
 Another, maybe better way, would be to build a Rest-API that serves the data from the database. But I wanted to find out what DBT is :D.
 The code can be found in [transformation](transformation).
-The scripts in [models](transformation%2Fmodels) produce three views, one with basic statistics like the average price for each run, 
+The scripts in [models](transformation%2Fmodels) produce three views, one with basic statistics like the average price for each run,
 one that serves the data in a nice format and one that serves the dataset for the machine learning part.
 In the [seeds](transformation%2Fseeds)-folder the district information are saved aswell.
 
@@ -43,7 +43,7 @@ For example we can visualize the average monthly price for each district in dues
 Also we can visualize the mean monthly price as a time series so we can compare the current mean price with historic prices.
 The "dashboards" are built with [Streamlit](https://streamlit.io).
 The dashboards can be found in [pages](user-interface%2Fpages).
-In the same folder there is also a user interface that can be used to get the predictions from the random forrest regressor in a user-friendly way. 
+In the same folder there is also a user interface that can be used to get the predictions from the random forrest regressor in a user-friendly way.
 
 The whole flow is summarized in the picture below:
 ![chart.png](resources%2Fchart.png)
@@ -65,21 +65,21 @@ Then type the following command to start the scrapers:
 ```shell
 scrapy list|xargs -n 1 scrapy crawl
 ```
-After that the most recent data should be stored in the database 
+After that the most recent data should be stored in the database
 
 
 ## 2. Run the transformators
 This step is optional. If this step should be skipped the queries in the other steps should be replaced by the queries defined in the model folder.
-To run this step, setup DBT and navigate to [transformation](transformation). There you just run the command 
+To run this step, setup DBT and navigate to [transformation](transformation). There you just run the command
 ```shell
 dbt run
 ```
 This command also persists the district data from the file [district.csv](transformation%2Fseeds%2Fdistrict.csv) in the seeds folder.
 
 ## 3. Train the model
-After this the data is ready to be used by the machine learning model. 
+After this the data is ready to be used by the machine learning model.
 To train the model and store it, just run the script [model-training.py](machine-learning%2Fmodel%2Fmodel-training.py).
-After this just run the command 
+After this just run the command
 ```shell
 cd machine-learning
 bentoml serve service:tree
@@ -87,7 +87,7 @@ bentoml serve service:tree
 
 ## 4. Run the user interface
 After the whole setup is done the user interface can be started to interact with the machine learning model and to visualize the data.
-To do this just run 
+To do this just run
 ```
 cd user-interface
 streamlit run app.py

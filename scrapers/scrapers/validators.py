@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from pydantic import BaseModel, AnyHttpUrl
 from typing import Optional
+
+from pydantic import AnyHttpUrl, BaseModel
 
 
 class Price(BaseModel):

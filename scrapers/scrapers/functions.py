@@ -1,13 +1,14 @@
 from configparser import ConfigParser, NoSectionError
 from csv import DictReader
-from pkgutil import get_data
 from io import StringIO
+from pkgutil import get_data
+from typing import Generator
 
-from sqlalchemy_utils import create_database, database_exists
-from scrapers.model import Base
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
-from typing import Generator
+from sqlalchemy_utils import create_database, database_exists
+
+from scrapers.model import Base
 
 
 def read_credentials(section: str) -> dict:

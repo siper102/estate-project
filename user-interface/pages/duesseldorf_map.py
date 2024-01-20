@@ -1,10 +1,11 @@
+import configparser
+
 import folium
-import pandas as pd
 import geopandas as gpd
+import pandas as pd
+import requests
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
-import requests
-import configparser
 from streamlit_folium import st_folium
 
 
@@ -16,7 +17,10 @@ def get_engine():
 
 
 def read_geo_json():
-    url = "https://opendata.duesseldorf.de/sites/default/files/Stadtteilgrenzen%20Düsseldorf%202021%20ETRS89.geojson"
+    url = (
+        "https://opendata.duesseldorf.de/sites/default/"
+        "files/Stadtteilgrenzen%20Düsseldorf%202021%20ETRS89.geojson"
+    )
     r = requests.get(url)
 
     geo_df = (
@@ -30,7 +34,8 @@ def read_geo_json():
 def read_data():
     engine = get_engine()
     query = """
-    SELECT district_number, ROUND(AVG(price), 2) AS price, AVG(rooms) AS rooms,  AVG(price/area) AS price_per_qm
+    SELECT district_number, ROUND(AVG(price), 2) AS price,
+        AVG(rooms) AS rooms,  AVG(price/area) AS price_per_qm
     FROM estates_with_prices
     GROUP BY district_number;
     """

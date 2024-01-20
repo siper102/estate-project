@@ -1,9 +1,9 @@
+import configparser
+
 import pandas as pd
+import streamlit as st
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
-import matplotlib.pyplot as plt
-import configparser
-import streamlit as st
 
 
 def get_engine():

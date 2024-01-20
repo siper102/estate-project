@@ -1,6 +1,6 @@
 import bentoml
 from bentoml.io import JSON
-from pydantic import BaseModel, field_validator, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 def get_district_names():

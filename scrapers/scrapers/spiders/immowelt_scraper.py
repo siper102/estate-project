@@ -1,9 +1,11 @@
-import scrapy
-from urllib.parse import urlencode
 import re
-from scrapers.items import EstateItem, PriceItem
 from datetime import datetime
+from urllib.parse import urlencode
+
+import scrapy
+
 from scrapers.functions import get_district_information
+from scrapers.items import EstateItem, PriceItem
 
 
 class ImmoweltScraperSpider(scrapy.Spider):
@@ -78,7 +80,8 @@ class ImmoweltScraperSpider(scrapy.Spider):
 
     def parse_estate(self, response, item):
         location_information = response.xpath(
-            "//app-estate-address/div/sd-cell/sd-cell-row/sd-cell-col[@class='cell__col is-center-v']"
+            "//app-estate-address/div/sd-cell/sd-cell-row/"
+            "sd-cell-col[@class='cell__col is-center-v']"
         )
         street = location_information.xpath(
             "span[@data-cy='address-street']/text()"

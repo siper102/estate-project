@@ -1,6 +1,7 @@
 from scrapy import Spider
 from scrapy.statscollectors import StatsCollector
 from sqlalchemy.orm import sessionmaker
+
 from scrapers.functions import get_engine
 
 from .model import ScraperStats

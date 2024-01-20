@@ -1,6 +1,7 @@
-import streamlit as st
-import requests
 import json
+
+import requests
+import streamlit as st
 
 
 def get_district_names():

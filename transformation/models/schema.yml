@@ -34,4 +34,3 @@ models:
         description: When the information were scraped
       - name: source
         description: Provider of information
-

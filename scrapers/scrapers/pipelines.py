@@ -1,15 +1,16 @@
+import json
+from collections import defaultdict
+from datetime import date
+from pathlib import Path
+
+from itemadapter import ItemAdapter
+from pydantic import ValidationError
 from scrapy.exceptions import DropItem
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import sessionmaker
-from itemadapter import ItemAdapter
-from pydantic import ValidationError
-from pathlib import Path
-from datetime import date
-from collections import defaultdict
-import json
 
-from scrapers.model import Base, Estate, Price
 from scrapers.functions import get_engine
+from scrapers.model import Estate, Price
 from scrapers.validators import Estate as EstateModel
 
 

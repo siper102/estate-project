@@ -1,8 +1,10 @@
-import scrapy
-from scrapers.functions import get_district_information
-from urllib.parse import urlencode
-from scrapers.items import EstateItem, PriceItem
 import re
+from urllib.parse import urlencode
+
+import scrapy
+
+from scrapers.functions import get_district_information
+from scrapers.items import EstateItem, PriceItem
 
 
 class WohnungsboerseScraperSpider(scrapy.Spider):
@@ -41,7 +43,8 @@ class WohnungsboerseScraperSpider(scrapy.Spider):
 
     def parse_estate(self, response, di):
         display_name = response.xpath(
-            "//h2[@class='font-bold tracking-tight text-h4 lg:text-h3 mb-4 md:mb-8']/text()"
+            "//h2[@class='font-bold tracking-tight text-h4 "
+            "lg:text-h3 mb-4 md:mb-8']/text()"
         ).get()
         address = response.xpath("//div[@class='pl-4 md:pl-5 w-52']/text()").getall()
         street, postal_code = self.extract_location_information(address)
