@@ -34,10 +34,8 @@ def read_geo_json():
 def read_data():
     engine = get_engine()
     query = """
-    SELECT district_number, ROUND(AVG(price), 2) AS price,
-        AVG(rooms) AS rooms,  AVG(price/area) AS price_per_qm
-    FROM estates_with_prices
-    GROUP BY district_number;
+    SELECT *
+    FROM avg_square_metre_price_by_district;
     """
     df = pd.read_sql(query, engine)
     return df
