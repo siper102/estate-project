@@ -1,8 +1,8 @@
-SELECT DATE(p.scraped_at) AS date,
-       AVG(p.price) AS mean_price,
-       STDDEV(p.price) AS stdev,
-       MIN(p.price) AS min,
-       MAX(p.price) AS max
-FROM estates.price p
-JOIN estates.estate e on e.estate_id = p.estate_id
-GROUP BY DATE(p.scraped_at)
+SELECT date(p.scraped_at) as date,
+       avg(p.price) as mean_price,
+       stddev(p.price) as stdev,
+       min(p.price) as min,
+       max(p.price) as max
+FROM   estates.price p join estates.estate e
+        ON e.estate_id = p.estate_id
+GROUP BY date(p.scraped_at);

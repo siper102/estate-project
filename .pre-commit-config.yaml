@@ -29,8 +29,13 @@ repos:
     hooks:
     - id: flake8
       name: Linting with flake8
-- repo: https://github.com/psf/black-pre-commit-mirror
-  rev: 23.12.1
+-   repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 23.12.1
+    hooks:
+        - id: black-jupyter
+          language_version: python3.11
+          name: Format Jupyter Notebooks
+- repo: https://github.com/PabloRMira/sql_formatter
+  rev: master
   hooks:
-      - id: black-jupyter
-        language_version: python3.11
+  - id: sql_formatter
