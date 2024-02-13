@@ -38,9 +38,9 @@ The model is build with sklearn and the service that gives the predictions via A
 The model is trained with the data from the last 4 weeks and when the new model has a lower MSE on the training data the new model is used in production.
 
 ## Dashboards
-But there are also other use cases for the resulting data than training a ml model with it.
-For example we can visualize the average monthly price for each district in duesseldorf to find out what local differences there are.
-Also we can visualize the mean monthly price as a time series so we can compare the current mean price with historic prices.
+But there are other use cases for the resulting data than training a ml model with it.
+For example, we can visualize the average monthly price for each district in duesseldorf to find out what local differences there are.
+Also, we can visualize the mean monthly price as a time series, so we can compare the current mean price with historic prices.
 The "dashboards" are built with [Streamlit](https://streamlit.io).
 The dashboards can be found in [pages](user-interface%2Fpages).
 In the same folder there is also a user interface that can be used to get the predictions from the random forrest regressor in a user-friendly way.
@@ -49,55 +49,21 @@ The whole flow is summarized in the picture below:
 ![chart.png](resources%2Fchart.png)
 
 # How to run this project locally
-## 1. Run the scrapers
-To run the scrapers just navigate to the [scrapers directory](scrapers/scrapers). In the data directory add a file called **credentials.ini**
-with the following content:
-```ini
-[DATABASE]
-drivername=mysql+driver
-username=username
-password=password
-host=host
-port=port
-database=estates
-```
-Then type the following command to start the scrapers:
+This project can be easily started on a local machine with docker and docker-compose. Just type
 ```shell
-scrapy list|xargs -n 1 scrapy crawl
+docker-compose up
 ```
-After that the most recent data should be stored in the database
+and all services (a Postgres database, DBT, the trained BentoML model and the streamlit application) get started and sample data from [data_dump.sql](data_dump.sql), created by several runs, is loaded
+into the database.
+The credentials are provided by environment variables which are set in the docker-compose file.
+The REST-Api for the ml model can be visited on http://localhost:3000 and the streamlit application on http://localhost:8501.
 
-
-## 2. Run the transformators
-This step is optional. If this step should be skipped the queries in the other steps should be replaced by the queries defined in the model folder.
-To run this step, setup DBT and navigate to [transformation](transformation). There you just run the command
-```shell
-dbt run
-```
-This command also persists the district data from the file [district.csv](transformation%2Fseeds%2Fdistrict.csv) in the seeds folder.
-
-## 3. Train the model
-After this the data is ready to be used by the machine learning model.
-To train the model and store it, just run the script [model-training.py](machine-learning%2Fmodel%2Fmodel-training.py).
-After this just run the command
-```shell
-cd machine-learning
-bentoml serve service:tree
-```
-
-## 4. Run the user interface
-After the whole setup is done the user interface can be started to interact with the machine learning model and to visualize the data.
-To do this just run
-```
-cd user-interface
-streamlit run app.py
-```
-This directly opens the user interface in the web browser.
 
 # Possible improvements
-Since this is just a project for personal research there is of cource room for improvements. I would like to outline a few points:
-- For production it would be good to use Scrapyd to build a Rest API on top of the Scrapy project. This makes the logs available in a folder and lets you run the spiders from anywhere via http request.
-- It would be good to use a orchestration tool like Airflow or Prefect to run the spiders and make the training
-- If everything runs automated the monitoring has to beimproved and a masseges have to be sent when anythong looks unusual.
+Since this is just a project for personal research there is of course room for improvements. I would like to outline a few points:
+- For production, it would be good to use Scrapyd to build a Rest API on top of the Scrapy project. This makes the logs available in a folder and lets you run the spiders from anywhere via http request.
+- It would be good to use an orchestration tool like Airflow or Prefect to run the spiders and make the training
+- If everything runs automated the monitoring has to be improved and a messages have to be sent when anything looks unusual.
 - The data validation needs to be improved to check that we just scrape data from flats and no office buildings or something like this.
-- To make better predictions we need more information about the flat. For example the last rennovation or weather the flat is furnished could have an influence on the price.
+- To make better predictions we need more information about the flat. For example the last renovation or weather the flat is furnished could have an influence on the price.
+- For credentials, it is always better to use some secret manager like GCP secret-manager

@@ -1,11 +1,11 @@
 from configparser import ConfigParser, NoSectionError
 from csv import DictReader
 from io import StringIO
+from os import environ as env
 from pkgutil import get_data
 from typing import Generator
 
 from sqlalchemy import create_engine
-from sqlalchemy.engine.url import URL
 from sqlalchemy_utils import create_database, database_exists
 
 from scrapers.model import Base
@@ -44,17 +44,19 @@ def get_district_information(replace_umlaut=False) -> Generator:
 
 def get_engine():
     """
-    Create sqlalchemy.engine.Engine from credentials and create tables
-    if they do not exist
-    :param database_credentials: json containing credentials
-    :return: engine for the credentials
+    Create sqlalchemy.engine.Engine
     """
-    database_credentials = read_credentials("DATABASE")
-    engine = create_engine(URL.create(**database_credentials))
+    url = "postgresql+psycopg2://{user}:{password}@{host}/{database}"
+    engine = create_engine(
+        url.format(
+            user=env.get("PGUSER"),
+            password=env.get("PGPASSWORD"),
+            host=env.get("PGHOST"),
+            database=env.get("PGDATABASE"),
+        )
+    )
     if not database_exists(engine.url):
         create_database(engine.url)
+    # Create Tables if not exist
     Base.metadata.create_all(engine, checkfirst=True)
     return engine
-
-
-print(read_credentials("DATABASE"))

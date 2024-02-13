@@ -1,0 +1,79 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: postgres-container
+    networks:
+      - database
+    ports:
+      - "5432:5432"
+    # volumes:
+    #   - ~/apps/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=password123
+      - POSTGRES_USER=estates_scraper
+      - POSTGRES_DB=estates
+    volumes:
+      - ./data_dump.sql:/docker-entrypoint-initdb.d/data_dump.sql
+  dbt:
+    image: estates/transformations
+    container_name: transformations
+    command: dbt run
+    networks:
+      - database
+    environment:
+      - PGPASSWORD=password123
+      - PGUSER=estates_scraper
+      - PGDATABASE=estates
+      - PGHOST=postgres-container
+    build:
+      context: transformations
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+  ml:
+    image: estates/machine-learning
+    container_name: machine-learning
+    command: bash -c "python3 model/model-training.py && bentoml serve service:tree -p 3000"
+    ports:
+      - "3000:3000"
+    networks:
+      - database
+    environment:
+      - PGPASSWORD=password123
+      - PGUSER=estates_scraper
+      - PGDATABASE=estates
+      - PGHOST=postgres-container
+    build:
+      context: machine-learning
+      dockerfile: Dockerfile
+    depends_on:
+      dbt:
+        condition: service_completed_successfully
+  ui:
+    image: estates/user-interface
+    container_name: user-interface
+    command: bash -c "streamlit run app.py --server.port=8501"
+    platform: linux/amd64
+    ports:
+      - "8501:8501"
+    networks:
+      - database
+    environment:
+      - PGPASSWORD=password123
+      - PGUSER=estates_scraper
+      - PGDATABASE=estates
+      - PGHOST=postgres-container
+      - PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
+      - BENTOML_HOST=machine-learning
+    build:
+      context: user-interface
+      dockerfile: Dockerfile
+    depends_on:
+      ml:
+        condition: service_started
+
+networks:
+  database:
+    name: database-network

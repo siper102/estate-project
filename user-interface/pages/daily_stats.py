@@ -1,15 +1,23 @@
-import configparser
+from os import environ as env
 
 import pandas as pd
 import streamlit as st
-from sqlalchemy import create_engine
-from sqlalchemy.engine.url import URL
+from sqlalchemy import create_engine, text
 
 
 def get_engine():
-    parser = configparser.ConfigParser()
-    parser.read("data/credentials.ini")
-    engine = create_engine(URL.create(**parser["DATABASE"]))
+    """
+    Create sqlalchemy.engine.Engine
+    """
+    url = "postgresql+psycopg2://{user}:{password}@{host}/{database}"
+    engine = create_engine(
+        url.format(
+            user=env.get("PGUSER"),
+            password=env.get("PGPASSWORD"),
+            host=env.get("PGHOST"),
+            database=env.get("PGDATABASE"),
+        )
+    )
     return engine
 
 
@@ -17,9 +25,10 @@ def read_data():
     engine = get_engine()
     query = """
     SELECT *
-    FROM daily_stats;
+    FROM estates.daily_stats;
     """
-    df = pd.read_sql(query, engine).set_index("date")
+    with engine.connect() as con:
+        df = pd.read_sql(sql=text(query), con=con).set_index("date")
     return df
 
 

@@ -1,6 +1,6 @@
 import logging
-from configparser import ConfigParser
 from math import inf
+from os import environ as env
 from time import time
 
 import pandas as pd
@@ -11,8 +11,7 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
-from sqlalchemy import create_engine, func
-from sqlalchemy.engine.url import URL
+from sqlalchemy import create_engine, func, text
 from sqlalchemy.orm import Session
 from sqlalchemy_utils import create_database, database_exists
 
@@ -22,12 +21,17 @@ logger = logging.getLogger(__name__)
 
 def get_engine():
     """
-    Create sqlalchemy.engine.Engine for credentials in data/credentials.ini
+    Create sqlalchemy.engine.Engine
     """
-    parser = ConfigParser()
-    parser.read("../data/credentials.ini")
-
-    engine = create_engine(URL.create(**parser["DATABASE"]))
+    url = "postgresql+psycopg2://{user}:{password}@{host}/{database}"
+    engine = create_engine(
+        url.format(
+            user=env.get("PGUSER"),
+            password=env.get("PGPASSWORD"),
+            host=env.get("PGHOST"),
+            database=env.get("PGDATABASE"),
+        )
+    )
     if not database_exists(engine.url):
         create_database(engine.url)
     # Create Tables if not exist
@@ -41,11 +45,12 @@ def extract_data(engine):
     :param engine: the engine for the database
     :return: pd.DataFrame with the data
     """
-    query = """
+    sql = """
     SELECT *
-    FROM ml_training_data;
+    FROM estates.ml_training_data;
     """
-    df = pd.read_sql_query(sql=query, con=engine)
+    with engine.connect() as con:
+        df = pd.read_sql(sql=text(sql), con=con)
     df = df.dropna()
     return df
 
@@ -161,7 +166,7 @@ if __name__ == "__main__":
 
     # Create stats and persist
     stats = MlStats(
-        model_tag=model_tag,
+        model_tag=str(model_tag),
         train_score=train_score,
         test_score=train_score,
         mse_train=mse_train,

@@ -1,18 +1,26 @@
-import configparser
+from os import environ as env
 
 import folium
 import geopandas as gpd
 import pandas as pd
 import requests
-from sqlalchemy import create_engine
-from sqlalchemy.engine.url import URL
+from sqlalchemy import create_engine, text
 from streamlit_folium import st_folium
 
 
 def get_engine():
-    parser = configparser.ConfigParser()
-    parser.read("data/credentials.ini")
-    engine = create_engine(URL.create(**parser["DATABASE"]))
+    """
+    Create sqlalchemy.engine.Engine
+    """
+    url = "postgresql+psycopg2://{user}:{password}@{host}/{database}"
+    engine = create_engine(
+        url.format(
+            user=env.get("PGUSER"),
+            password=env.get("PGPASSWORD"),
+            host=env.get("PGHOST"),
+            database=env.get("PGDATABASE"),
+        )
+    )
     return engine
 
 
@@ -35,9 +43,10 @@ def read_data():
     engine = get_engine()
     query = """
     SELECT *
-    FROM avg_square_metre_price_by_district;
+    FROM estates.avg_square_metre_price_by_district;
     """
-    df = pd.read_sql(query, engine)
+    with engine.connect() as con:
+        df = pd.read_sql(sql=text(query), con=con)
     return df
 
 

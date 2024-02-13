@@ -155,8 +155,8 @@ cython_debug/
 # logs
 logs
 
-# credentials
-credentials.ini
+# error file
+errors
 
 # IDE
 .idea

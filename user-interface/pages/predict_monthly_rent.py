@@ -1,4 +1,5 @@
 import json
+from os import environ as env
 
 import requests
 import streamlit as st
@@ -11,6 +12,7 @@ def get_district_names():
 
 
 st.title("Estate App")
+BENTOML_HOST = env.get("BENTOML_HOST", "localhost")
 
 data = {}
 
@@ -30,7 +32,7 @@ data["construction_year"] = st.number_input(
 
 if st.button("Get predicted monthly rent"):
     pred = requests.post(
-        url="http://0.0.0.0:3000/predict",
+        url=f"http://{BENTOML_HOST}:3000/predict",
         headers={"content-type": "application/json"},
         data=json.dumps(data),
     ).json()

@@ -1,6 +1,0 @@
-service: "service.py:tree"
-include:
-  - "*.py"
-  - "data"
-python:
-  requirements_txt: "./requirements.txt"

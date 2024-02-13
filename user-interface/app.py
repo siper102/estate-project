@@ -5,4 +5,4 @@ st.set_page_config(
     page_icon="👋",
 )
 
-st.sidebar.success("Select a demo above.")
+st.sidebar.success("Select the analysis you want to use.")
