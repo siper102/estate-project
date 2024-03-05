@@ -1,4 +1,3 @@
-from configparser import ConfigParser, NoSectionError
 from csv import DictReader
 from io import StringIO
 from os import environ as env
@@ -9,20 +8,6 @@ from sqlalchemy import create_engine
 from sqlalchemy_utils import create_database, database_exists
 
 from scrapers.model import Base
-
-
-def read_credentials(section: str) -> dict:
-    """
-    Read credentials from the .ini file.
-    :param section: name of the section
-    :return: the content of the section
-    """
-    cred = get_data("scrapers", "data/credentials.ini")
-    config = ConfigParser()
-    config.read_string(cred.decode("utf-8"))
-    if section not in config:
-        raise NoSectionError(f"{section} not in .ini file")
-    return dict(config[section])
 
 
 def get_district_information(replace_umlaut=False) -> Generator:
