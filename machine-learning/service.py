@@ -12,8 +12,7 @@ def get_district_names():
 class EstateInput(BaseModel):
     district_name: str
     rooms: float = Field(ge=1)
-    area: float = Field(ge=1)
-    construction_year: int
+    construction_year: int = Field(ge=1990)
 
     @field_validator("district_name")
     @classmethod

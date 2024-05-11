@@ -4,4 +4,4 @@ pandas
 psycopg2-binary
 SQLAlchemy==2.0.13
 streamlit==1.31.0
-streamlit_folium
+streamlit_folium==0.18.0

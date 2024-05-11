@@ -15,10 +15,10 @@ def get_engine():
     url = "postgresql+psycopg2://{user}:{password}@{host}/{database}"
     engine = create_engine(
         url.format(
-            user=env.get("PGUSER"),
-            password=env.get("PGPASSWORD"),
-            host=env.get("PGHOST"),
-            database=env.get("PGDATABASE"),
+            user=env.get("PGUSER", "estates_scraper"),
+            password=env.get("PGPASSWORD", "password123"),
+            host=env.get("PGHOST", "localhost"),
+            database=env.get("PGDATABASE", "estates"),
         )
     )
     return engine
@@ -96,7 +96,6 @@ choropleth.geojson.add_child(
         """,
     )
 )
-
 
 # call to render Folium map in Streamlit
 st_data = st_folium(m, width=725)
