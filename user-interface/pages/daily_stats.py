@@ -1,35 +1,19 @@
-from os import environ as env
+from os import getenv
 
 import pandas as pd
 import streamlit as st
-from sqlalchemy import create_engine, text
+from requests import get
 
-
-def get_engine():
-    """
-    Create sqlalchemy.engine.Engine
-    """
-    url = "postgresql+psycopg2://{user}:{password}@{host}/{database}"
-    engine = create_engine(
-        url.format(
-            user=env.get("PGUSER"),
-            password=env.get("PGPASSWORD"),
-            host=env.get("PGHOST"),
-            database=env.get("PGDATABASE"),
-        )
-    )
-    return engine
+API_HOST = getenv("API_HOST", "localhost")
+API_PORT = getenv("API_PORT", 8000)
+API_KEY = getenv("UI_API_KEY", "ui_api_key")
 
 
 def read_data():
-    engine = get_engine()
-    query = """
-    SELECT *
-    FROM estates.daily_stats;
-    """
-    with engine.connect() as con:
-        df = pd.read_sql(sql=text(query), con=con).set_index("date")
-    return df
+    r = get(
+        url=f"http://{API_HOST}:{API_PORT}/daily-stats", headers={"x-api-key": API_KEY}
+    )
+    return pd.read_json(r.text).set_index("date_scraped")
 
 
 data = read_data()

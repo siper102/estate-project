@@ -1,18 +1,20 @@
 import json
-from os import environ as env
+from os import getenv
 
 import requests
 import streamlit as st
 
+API_HOST = getenv("API_HOST", "localhost")
+API_PORT = getenv("API_PORT", 8000)
+BENTOML_HOST = getenv("BENTOML_HOST", "localhost")
+BENTOML_PORT = getenv("BENTOML_PORT", 3000)
 
-def get_district_names():
-    with open("data/districts.txt", "r") as f:
-        content = f.read().splitlines()
-    return content
+
+def get_district_names() -> list[str]:
+    return requests.get(f"http://{API_HOST}:{API_PORT}/districts/names").json()
 
 
 st.title("Estate App")
-BENTOML_HOST = env.get("BENTOML_HOST", "localhost")
 
 data = {}
 
@@ -30,10 +32,10 @@ data["construction_year"] = st.number_input(
 
 if st.button("Get predicted monthly rent"):
     pred = requests.post(
-        url=f"http://{BENTOML_HOST}:3000/predict",
+        url=f"http://{BENTOML_HOST}:{BENTOML_PORT}/predict",
         headers={"content-type": "application/json"},
         data=json.dumps(data),
     ).json()
-    st.write(f"Estimated monthly rent/m^2 is {round(pred[0], 2)}€")
+    st.write(f"Estimated monthly rent / m^2 is {round(pred[0], 2)}€")
     if area:
         st.write(f"Estimated monthly rent is {round(pred[0]) * area}")

@@ -1,27 +1,15 @@
-from os import environ as env
+from os import getenv
 
 import folium
 import geopandas as gpd
 import pandas as pd
 import requests
-from sqlalchemy import create_engine, text
+from requests import get
 from streamlit_folium import st_folium
 
-
-def get_engine():
-    """
-    Create sqlalchemy.engine.Engine
-    """
-    url = "postgresql+psycopg2://{user}:{password}@{host}/{database}"
-    engine = create_engine(
-        url.format(
-            user=env.get("PGUSER", "estates_scraper"),
-            password=env.get("PGPASSWORD", "password123"),
-            host=env.get("PGHOST", "localhost"),
-            database=env.get("PGDATABASE", "estates"),
-        )
-    )
-    return engine
+API_HOST = getenv("API_HOST")
+API_PORT = getenv("API_PORT")
+API_KEY = getenv("UI_API_KEY", "ui_api_key")
 
 
 def read_geo_json():
@@ -40,14 +28,11 @@ def read_geo_json():
 
 
 def read_data():
-    engine = get_engine()
-    query = """
-    SELECT *
-    FROM estates.avg_square_metre_price_by_district;
-    """
-    with engine.connect() as con:
-        df = pd.read_sql(sql=text(query), con=con)
-    return df
+    r = get(
+        url=f"http://{API_HOST}:{API_PORT}/avg-square-metre-price",
+        headers={"x-api-key": API_KEY},
+    )
+    return pd.read_json(r.text)
 
 
 data = read_data()
