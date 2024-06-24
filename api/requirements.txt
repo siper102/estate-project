@@ -1,0 +1,5 @@
+fastapi==0.111.0
+psycopg2-binary
+pydantic==2.7.4
+SQLAlchemy<2.1.0
+sqlmodel==0.0.19
