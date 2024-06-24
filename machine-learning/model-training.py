@@ -1,57 +1,37 @@
 import logging
 from math import inf
-from os import environ as env
+from os import getenv
 from time import time
 
 import pandas as pd
+import requests
 from bentoml.sklearn import save_model
-from mlstats import Base, MlStats
+from dto.ml_stats import MlStats
+from requests import get
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
-from sqlalchemy import create_engine, func, text
-from sqlalchemy.orm import Session
-from sqlalchemy_utils import create_database, database_exists
 
 MODEL_NAME = "estate-regressor"
+API_HOST = getenv("API_HOST", "localhost")
+API_PORT = getenv("API_PORT", 8000)
+API_KEY = getenv("ML_API_KEY", "ml_api_key")
+
 logger = logging.getLogger(__name__)
 
 
-def get_engine():
+def extract_data() -> pd.DataFrame:
     """
-    Create sqlalchemy.engine.Engine
-    """
-    url = "postgresql+psycopg2://{user}:{password}@{host}/{database}"
-    engine = create_engine(
-        url.format(
-            user=env.get("PGUSER"),
-            password=env.get("PGPASSWORD"),
-            host=env.get("PGHOST"),
-            database=env.get("PGDATABASE"),
-        )
-    )
-    if not database_exists(engine.url):
-        create_database(engine.url)
-    # Create Tables if not exist
-    Base.metadata.create_all(engine, checkfirst=True)
-    return engine
-
-
-def extract_data(engine):
-    """
-    Use the engine to extract the estate data from the database
-    :param engine: the engine for the database
+    Extract train data from Rest Api
     :return: pd.DataFrame with the data
     """
-    sql = """
-    SELECT *
-    FROM estates.ml_training_data;
-    """
-    with engine.connect() as con:
-        df = pd.read_sql(sql=text(sql), con=con)
-    df = df.dropna()
+    r = get(
+        url=f"http://{API_HOST}:{API_PORT}/ml/train-data",
+        headers={"x-api-key": API_KEY},
+    )
+    df = pd.read_json(r.text)
     return df
 
 
@@ -83,20 +63,23 @@ def create_model(X: list, y: pd.Series) -> Pipeline:
     return pipeline
 
 
-def get_latest_model_stats(engine):
+def get_latest_model_stats():
     """
     Use the engine to query the mse and tag from the last model
-    :param engine: the engine for the database connection
     :return: mse and tag of last model
     """
-    with Session(engine) as session:
-        max_id = session.query(func.max(MlStats.id)).scalar()
-        stat = session.query(MlStats).filter(MlStats.id == max_id).first()
-        if stat:
-            latest_tag = stat.model_tag
-            latest_mse = stat.mse_train
-            return latest_mse, latest_tag
-    return inf, None
+    r = requests.get(
+        url=f"http://{API_HOST}:{API_PORT}/ml/ml-stats",
+        params={"last_n": 1},
+        headers={"x-api-key": API_KEY},
+    )
+    stat = r.json()
+    if len(stat) > 0:
+        latest_tag = stat[0].get("model_tag")
+        latest_mse = stat[0].get("mse_train")
+        return latest_mse, latest_tag
+    else:
+        return inf, None
 
 
 def evaluate_model(model, X_train, y_train, X_test, y_test):
@@ -117,55 +100,52 @@ def evaluate_model(model, X_train, y_train, X_test, y_test):
     return train_score, test_score, mse_train
 
 
-def persist_stats(stats, engine):
+def persist_stats(stats: MlStats):
     """
     Save the stats for this training session
-    :param stats: Stats ORM object (see mlstats.py)
-    :param engine: the engine for the database connection
+    :param stats: Stats DTO object (see mlstats.py)
     """
-    with Session(engine) as session:
-        session.add(stats)
-        session.commit()
+    requests.post(
+        url=f"http://{API_HOST}:{API_PORT}/ml/ml-stats",
+        data=stats.model_dump_json(),
+        headers={"x-api-key": API_KEY},
+    )
 
 
 if __name__ == "__main__":
-    logger.info("creating database connection")
-    # Connect to database
-    engine = get_engine()
-
     # extract data from database
     logger.info("connected to database...extract data")
-    data = extract_data(engine=engine)
+    data = extract_data()
 
     # transform data and split in test and training data
-    logger.info("transform data")
+    print("transform data")
     X_train, X_test, y_train, y_test = transform_data(data)
 
     # train model with latest data
     start = time()
     model = create_model(X_train, y_train)
     stop = time()
-    logger.info(f"model trained...training took {stop - start} seconds")
+    print(f"model trained...training took {stop - start} seconds")
 
     # calculate metrics
     train_score, test_score, mse_train = evaluate_model(
         model=model, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test
     )
     # Get latest MSE to compare the two models
-    latest_mse, model_tag = get_latest_model_stats(engine)
+    latest_mse, model_tag = get_latest_model_stats()
 
     # If the MSE decreased use the new model in production
     if mse_train < latest_mse:
         saved_model = save_model(name=MODEL_NAME, model=model)
         in_production = True
         model_tag = saved_model.tag
-        logger.info(f"New model {saved_model} in production")
+        print(f"New model {saved_model} in production")
     else:
         in_production = False
-        logger.info("Old model used in production")
+        print("Old model used in production")
 
     # Create stats and persist
-    stats = MlStats(
+    ml_stats = MlStats(
         model_tag=str(model_tag),
         train_score=train_score,
         test_score=train_score,
@@ -175,5 +155,5 @@ if __name__ == "__main__":
         test_size=len(X_test),
         training_time=stop - start,
     )
-    persist_stats(stats, engine)
+    persist_stats(ml_stats)
     logger.info("Stats persisted")
