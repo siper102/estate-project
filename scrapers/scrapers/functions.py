@@ -1,13 +1,10 @@
-from csv import DictReader
-from io import StringIO
-from os import environ as env
-from pkgutil import get_data
+from os import getenv
 from typing import Generator
 
-from sqlalchemy import create_engine
-from sqlalchemy_utils import create_database, database_exists
+import requests
 
-from scrapers.model import Base
+API_HOST = getenv("API_HOST", "localhost")
+API_PORT = getenv("API_PORT", 8000)
 
 
 def get_district_information(replace_umlaut=False) -> Generator:
@@ -17,31 +14,12 @@ def get_district_information(replace_umlaut=False) -> Generator:
     :param replace_umlaut: weather to replace the "umlaute"
     :return: The content each row represented as dictionary
     """
-    csv_content = get_data("scrapers", "data/district.csv")
-    buff = StringIO(csv_content.decode("utf-8"))
-    reader = DictReader(buff)
-    for row in reader:
+    r = requests.get(
+        url=f"http://{API_HOST}:{API_PORT}/districts/get-districts",
+        headers={"x-api-key": getenv("SCRAPER_API_KEY", "scraper_api_key")},
+    )
+    for row in r.json():
         if replace_umlaut:
             dictionary = {ord("ä"): "ae", ord("ö"): "oe", ord("ü"): "ue"}
             row["district_name"] = row["district_name"].translate(dictionary)
         yield row
-
-
-def get_engine():
-    """
-    Create sqlalchemy.engine.Engine
-    """
-    url = "postgresql+psycopg2://{user}:{password}@{host}/{database}"
-    engine = create_engine(
-        url.format(
-            user=env.get("PGUSER"),
-            password=env.get("PGPASSWORD"),
-            host=env.get("PGHOST"),
-            database=env.get("PGDATABASE"),
-        )
-    )
-    if not database_exists(engine.url):
-        create_database(engine.url)
-    # Create Tables if not exist
-    Base.metadata.create_all(engine, checkfirst=True)
-    return engine

@@ -6,6 +6,7 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+from os import getenv
 
 BOT_NAME = "scrapers"
 
@@ -63,10 +64,14 @@ DOWNLOAD_DELAY = 2
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     "scrapers.pipelines.ValidationPipeline": 200,
-    "scrapers.pipelines.DatabasePipeline": 300,
+    "scrapers.pipelines.RestPipeline": 300,
 }
 
 STATS_CLASS = "scrapers.stats_collector.StatsPersistence"
+
+API_HOST = getenv("API_HOST", "localhost")
+API_PORT = getenv("API_PORT", 8000)
+API_KEY = getenv("SCRAPER_API_KEY", "scraper_api_key")
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

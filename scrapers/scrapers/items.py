@@ -7,18 +7,19 @@ class EstateItem(Item):
     area = Field()
     rooms = Field()
     display_name = Field()
-    location = Field()
+    district_number = Field()
     postal_code = Field()
     street = Field()
     lat = Field()
     lon = Field()
     construction_year = Field()
 
-    price_item = Field()
+    # price_item = Field()
 
 
 class PriceItem(Item):
     price = Field()
     scraped_at = Field()
     source = Field()
-    estate_id = Field()
+    # estate_id = Field()
+    estate = Field()

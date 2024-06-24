@@ -3,15 +3,12 @@ from collections import defaultdict
 from datetime import date
 from pathlib import Path
 
+import requests
 from itemadapter import ItemAdapter
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 from scrapy.exceptions import DropItem
-from sqlalchemy.inspection import inspect
-from sqlalchemy.orm import sessionmaker
 
-from scrapers.functions import get_engine
-from scrapers.model import Estate, Price
-from scrapers.validators import Estate as EstateModel
+from scrapers.validators import Price as PriceModel
 
 
 class ValidationPipeline:
@@ -29,7 +26,7 @@ class ValidationPipeline:
         """
         item_adapter = ItemAdapter(item=item)
         try:
-            estate_model = EstateModel.validate(item_adapter)
+            estate_model = PriceModel.validate(item_adapter)
             return estate_model
         except ValidationError as e:
             item_dict = item_adapter.asdict()
@@ -57,41 +54,27 @@ class ValidationPipeline:
                 json.dump(self.errors, f, indent=4)
 
 
-class DatabasePipeline:
-    def __init__(self):
-        self.engine = get_engine()
-        self.session_maker = sessionmaker(bind=self.engine, autoflush=False)
-        self.inspector = inspect(self.engine)
+class RestPipeline:
+    def __init__(self, api_host, api_port, api_key):
+        self.api_host = api_host
+        self.api_port = api_port
+        self.api_key = api_key
 
-    def process_item(self, item, spider):
-        """
-        Save the current processed item in the database and returns the item.
-        ItemAdapter is used since the input type can be different depending on
-        the pipeline step performed before saving.
-        :param item: current item
-        :param spider: unused
-        :return: the item that is processed
-        """
-        estate_item = ItemAdapter(item=item)
-        price_item = estate_item.pop("price_item")
-        with self.session_maker.begin() as session:
-            estate_orm = self.get_estate_orm(estate_item=estate_item, session=session)
-            price_orm = Price(**price_item)
-            estate_orm.price.append(price_orm)
-            session.add(estate_orm)
-            session.commit()
-        return estate_item.item
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(
+            api_host=crawler.settings.get("API_HOST"),
+            api_port=crawler.settings.get("API_PORT"),
+            api_key=crawler.settings.get("API_PORT"),
+        )
 
-    def get_estate_orm(self, estate_item, session):
+    def process_item(self, item: BaseModel, spider):
         """
-        Check if current item is already persisted in the database and
-        if so return this item. Else convert the item to an Estate ORM object
-        :param estate_item: The current processed item
-        :param session: a database session (sqlalchemy.orm.Session)
-        :return: Estate ORM object (see model.py)
+        Post the item to the Rest API and returns it.
         """
-        estate_id = estate_item["estate_id"]
-        estate_orm = session.query(Estate).filter(Estate.estate_id == estate_id).first()
-        if not estate_orm:
-            estate_orm = Estate(**estate_item.asdict())
-        return estate_orm
+        requests.post(
+            url=f"http://{self.api_port}:{self.api_port}/scraper/prices",
+            json=item.dict(),
+            headers={"x-api-key": self.api_key},
+        )
+        return item

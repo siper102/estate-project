@@ -71,17 +71,13 @@ class WohnungsboerseScraperSpider(scrapy.Spider):
         else:
             construction_year = None
 
-        price_item = PriceItem(
-            price=price, source="Wohnungsboerse", estate_id=estate_id
-        )
         estate_item = EstateItem(
             estate_id=estate_id,
             link=response.url,
             area=size,
             rooms=rooms,
             display_name=display_name,
-            location=di["district_number"],
-            price_item=price_item,
+            district_number=di["district_number"],
             postal_code=postal_code,
             street=street,
             lat=lat,
@@ -89,7 +85,7 @@ class WohnungsboerseScraperSpider(scrapy.Spider):
             construction_year=construction_year,
         )
 
-        yield estate_item
+        yield PriceItem(price=price, source="Wohnungsboerse", estate=estate_item)
 
     def extract_location_information(self, address):
         if len(address) > 1:

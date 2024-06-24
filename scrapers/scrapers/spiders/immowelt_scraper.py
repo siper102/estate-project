@@ -61,14 +61,13 @@ class ImmoweltScraperSpider(scrapy.Spider):
                     area=self._extract_float(area),
                     rooms=self._extract_float(rooms),
                     display_name=display_name,
-                    location=di["district_number"],
-                    price_item=price_item,
+                    district_number=di["district_number"],
                     construction_year=None,
                 )
                 yield scrapy.Request(
                     url=link,
                     callback=self.parse_estate,
-                    cb_kwargs={"item": estate_item},
+                    cb_kwargs={"estate_item": estate_item, "price_item": price_item},
                 )
 
     def _extract_float(self, result):
@@ -78,7 +77,7 @@ class ImmoweltScraperSpider(scrapy.Spider):
         else:
             return None
 
-    def parse_estate(self, response, item):
+    def parse_estate(self, response, estate_item, price_item):
         location_information = response.xpath(
             "//app-estate-address/div/sd-cell/sd-cell-row/"
             "sd-cell-col[@class='cell__col is-center-v']"
@@ -97,8 +96,10 @@ class ImmoweltScraperSpider(scrapy.Spider):
         j = response.xpath("//script[@id='serverApp-state']/text()").get()
         res = re.search(r"ConstructionYear&q;:&q;([0-9]*)", j)
         if res:
-            item["construction_year"] = res.group(1)
+            estate_item["construction_year"] = res.group(1)
 
-        item["postal_code"] = postal_code
-        item["street"] = street
-        yield item
+        estate_item["postal_code"] = postal_code
+        estate_item["street"] = street
+
+        price_item["estate"] = estate_item
+        yield price_item
