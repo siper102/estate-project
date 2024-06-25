@@ -44,6 +44,8 @@ On the first page there is one plot that shows the time series of the average re
 On the second page we have a heatmap of düsseldorf where the prices for all districts are plotted.
 The third page can be used to make a prediction for a specific flat.
 
+### Visualization of the relationships between the services
+![Graph.jpg](resources%2FGraph.jpg)
 
 ## How to run this project locally
 All Services are Containerized so to start all the Services just type:
