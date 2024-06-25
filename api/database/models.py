@@ -1,5 +1,6 @@
 import enum
 from datetime import datetime
+from typing import Optional
 
 from sqlmodel import Field, SQLModel
 
@@ -29,14 +30,14 @@ class Estate(SQLModel, table=True):
 
     estate_id: str = Field(primary_key=True, default=None)
     link: str
-    area: float = None
-    rooms: float = None
-    display_name: str = None
-    postal_code: str
-    street: str = None
-    lat: float = None
-    lon: float = None
-    construction_year: int = None
+    area: Optional[float] = None
+    rooms: Optional[float] = None
+    display_name: Optional[str] = None
+    postal_code: Optional[str]
+    street: Optional[str] = None
+    lat: Optional[float] = None
+    lon: Optional[float] = None
+    construction_year: Optional[int] = None
     district_number: int = Field(
         default=None, foreign_key="estates.district.district_number"
     )
@@ -75,7 +76,7 @@ class MlStats(SQLModel, table=True):
     __table_args__ = {"schema": "estates"}
 
     id: int | None = Field(default=None, primary_key=True)
-    model_tag: str
+    tag: str
     trained_at: datetime = datetime.now()
     train_score: float
     test_score: float

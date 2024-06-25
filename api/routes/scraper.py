@@ -27,7 +27,9 @@ def insert_price_with_estate(
     session: Session = Depends(get_session),
     api_key: str = Depends(api_key_header),
 ):
+    print(price_orm)
     estate_orm = price_orm.estate
+    print(estate_orm)
     price = Price.model_validate(price_orm)
     price.estate_id = estate_orm.estate_id
     existing_estate_query = select(Estate).where(

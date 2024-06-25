@@ -6,12 +6,12 @@ from pydantic import BaseModel
 class EstateORM(BaseModel):
     estate_id: str
     link: str
-    area: float = None
-    rooms: float = None
-    display_name: str = None
+    area: Optional[float] = None
+    rooms: Optional[float] = None
+    display_name: Optional[str] = None
     district_number: int = None
-    postal_code: str
+    postal_code: Optional[str] = None
     street: Optional[str] = None
-    lat: float = None
-    lon: float = None
+    lat: Optional[float] = None
+    lon: Optional[float] = None
     construction_year: Optional[int] = None

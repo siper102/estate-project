@@ -21,7 +21,8 @@ def authorize(roles: list):
 
 def check_user_roles_by_api_key(api_key: str, roles: list):
     user = get_user_by_api_key(api_key)
-    if user.role in roles:
+    print(user)
+    if user and user.role in roles:
         return
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
