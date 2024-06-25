@@ -15,7 +15,7 @@ class WohnungsboerseScraperSpider(scrapy.Spider):
 
     def start_requests(self):
         district_information = get_district_information(replace_umlaut=True)
-        for di in district_information:
+        for di in list(district_information)[1:2]:
             path = "searches/index"
             query = {
                 "estate_marketing_types": "miete,1",

@@ -71,7 +71,7 @@ STATS_CLASS = "scrapers.stats_collector.StatsPersistence"
 
 API_HOST = getenv("API_HOST", "localhost")
 API_PORT = getenv("API_PORT", 8000)
-API_KEY = getenv("SCRAPER_API_KEY", "scraper_api_key")
+API_KEY = getenv("API_KEY", "scraper_api_key")
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

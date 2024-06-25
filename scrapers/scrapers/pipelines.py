@@ -65,7 +65,7 @@ class RestPipeline:
         return cls(
             api_host=crawler.settings.get("API_HOST"),
             api_port=crawler.settings.get("API_PORT"),
-            api_key=crawler.settings.get("API_PORT"),
+            api_key=crawler.settings.get("API_KEY"),
         )
 
     def process_item(self, item: BaseModel, spider):
@@ -73,7 +73,7 @@ class RestPipeline:
         Post the item to the Rest API and returns it.
         """
         requests.post(
-            url=f"http://{self.api_port}:{self.api_port}/scraper/prices",
+            url=f"http://{self.api_host}:{self.api_port}/scraper/prices",
             json=item.dict(),
             headers={"x-api-key": self.api_key},
         )
