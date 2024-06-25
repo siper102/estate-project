@@ -1,3 +1,4 @@
+from io import StringIO
 from os import getenv
 
 import folium
@@ -29,10 +30,10 @@ def read_geo_json():
 
 def read_data():
     r = get(
-        url=f"http://{API_HOST}:{API_PORT}/avg-square-metre-price",
+        url=f"http://{API_HOST}:{API_PORT}/ui/avg-square-metre-price",
         headers={"x-api-key": API_KEY},
     )
-    return pd.read_json(r.text)
+    return pd.read_json(StringIO(r.text))
 
 
 data = read_data()

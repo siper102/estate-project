@@ -1,3 +1,4 @@
+from io import StringIO
 from os import getenv
 
 import pandas as pd
@@ -11,9 +12,10 @@ API_KEY = getenv("UI_API_KEY", "ui_api_key")
 
 def read_data():
     r = get(
-        url=f"http://{API_HOST}:{API_PORT}/daily-stats", headers={"x-api-key": API_KEY}
+        url=f"http://{API_HOST}:{API_PORT}/ui/daily-stats",
+        headers={"x-api-key": API_KEY},
     )
-    return pd.read_json(r.text).set_index("date_scraped")
+    return pd.read_json(StringIO(r.text)).set_index("date_scraped")
 
 
 data = read_data()
