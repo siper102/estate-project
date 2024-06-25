@@ -20,7 +20,7 @@ services:
   ml:
     image: estates/machine-learning
     container_name: machine-learning
-    command: bash -c "python3 model-training.py && bentoml serve service:tree -p 3000"
+    command: bash -c "python3 model-training.py && bentoml serve service:tree -p 3000 --reload"
     ports:
       - "3000:3000"
     networks:
@@ -29,6 +29,7 @@ services:
       - API_HOST=api
       - API_PORT=8000
       - ML_API_KEY=ml_api_key
+      - WATCHFILES_FORCE_POLLING=true
     build:
       context: machine-learning
       dockerfile: Dockerfile
