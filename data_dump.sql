@@ -58,7 +58,7 @@ ALTER TABLE estates.estate OWNER TO estates_scraper;
 
 CREATE TABLE estates.ml_stats (
     id bigint NOT NULL,
-    model_tag character varying(40),
+    tag character varying(40),
     trained_at timestamp with time zone,
     train_score double precision,
     test_score double precision,
