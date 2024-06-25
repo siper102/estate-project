@@ -12,4 +12,7 @@ tree = bentoml.Service("estate_fastapi_demo", runners=[regression_runner])
 )
 def predict(input_series: EstateInput) -> EstateOutput:
     result = regression_runner.run(input_series.model_dump())
-    return result
+    return EstateOutput(
+        monthly_rental_price=result,
+        predictor_version=regression_runner.models[0].tag.version,
+    )

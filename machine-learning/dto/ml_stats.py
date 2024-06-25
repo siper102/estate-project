@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class MlStats(BaseModel):
-    model_tag: str
+    tag: str
     trained_at: datetime = datetime.now()
     train_score: float
     test_score: float

@@ -1,4 +1,5 @@
 import logging
+from io import StringIO
 from math import inf
 from os import getenv
 from time import time
@@ -31,7 +32,7 @@ def extract_data() -> pd.DataFrame:
         url=f"http://{API_HOST}:{API_PORT}/ml/train-data",
         headers={"x-api-key": API_KEY},
     )
-    df = pd.read_json(r.text)
+    df = pd.read_json(StringIO(r.text))
     return df
 
 
@@ -51,13 +52,13 @@ def transform_data(data: pd.DataFrame):
 def create_model(X: list, y: pd.Series) -> Pipeline:
     """
     Create the Model pipeline, train it and return.
-    The DictVectorizer converts string rows to dummy varioables (here district name)
+    The DictVectorizer converts string rows to dummy variables (here district name)
     :param X: The feature variables
     :param y: The target variables
     :return: The fitted model
     """
     pipeline = Pipeline(
-        [("transformer", DictVectorizer()), ("forrest", RandomForestRegressor())]
+        [("transformation", DictVectorizer()), ("forrest", RandomForestRegressor())]
     )
     pipeline.fit(X=X, y=y)
     return pipeline
@@ -75,7 +76,7 @@ def get_latest_model_stats():
     )
     stat = r.json()
     if len(stat) > 0:
-        latest_tag = stat[0].get("model_tag")
+        latest_tag = stat[0].get("tag")
         latest_mse = stat[0].get("mse_train")
         return latest_mse, latest_tag
     else:
@@ -146,7 +147,7 @@ if __name__ == "__main__":
 
     # Create stats and persist
     ml_stats = MlStats(
-        model_tag=str(model_tag),
+        tag=str(model_tag),
         train_score=train_score,
         test_score=train_score,
         mse_train=mse_train,
