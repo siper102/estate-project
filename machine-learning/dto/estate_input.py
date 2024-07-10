@@ -14,7 +14,6 @@ district_names: list[str] = requests.get(
 class EstateInput(BaseModel):
     district_name: str
     rooms: float = Field(ge=1)
-    construction_year: int = Field(ge=1990)
 
     @field_validator("district_name")
     @classmethod

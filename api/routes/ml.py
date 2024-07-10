@@ -5,7 +5,6 @@ from database.models import AccessType, District, Estate, MlStats, Price
 from dto.train_data_dto import TrainDataDTO
 from fastapi import APIRouter, Depends
 from security.api_key_manager import api_key_header, authorize
-from sqlalchemy.sql import label
 from sqlmodel import Session, select
 
 ml_router = APIRouter()
@@ -44,14 +43,9 @@ def get_train_data(
 ) -> list[TrainDataDTO]:
     models = []
     stm = (
-        select(
-            District.district_name,
-            Estate.construction_year,
-            Estate.rooms,
-            label("price", Price.price / Estate.area),
-        )
+        select(District.district_name, Estate.area, Estate.rooms, Price.price)
         .where(District.district_name.is_not(None))
-        .where(Estate.construction_year.is_not(None))
+        .where(Estate.area.is_not(None))
         .where(Estate.rooms.is_not(None))
         .where(Price.price.is_not(None))
         .join(District)

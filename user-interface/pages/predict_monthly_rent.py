@@ -26,9 +26,6 @@ data["rooms"] = st.number_input("Rooms", min_value=1, value=1, help="Number of r
 
 area = st.number_input("Area", min_value=1, value=1, help="The area of the Flat")
 
-data["construction_year"] = st.number_input(
-    "Year of construction", min_value=1990, max_value=2024, help="Year of construction"
-)
 
 if st.button("Get predicted monthly rent"):
     pred = requests.post(
@@ -36,6 +33,4 @@ if st.button("Get predicted monthly rent"):
         headers={"content-type": "application/json"},
         data=json.dumps(data),
     ).json()
-    st.write(f"Estimated monthly rent / m^2 is {round(pred[0], 2)}€")
-    if area:
-        st.write(f"Estimated monthly rent is {round(pred[0]) * area}")
+    st.write(f"Estimated monthly rent is {round(pred['monthly_rental_price'], 2)}€")
