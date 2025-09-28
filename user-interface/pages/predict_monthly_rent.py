@@ -24,7 +24,9 @@ data["district_name"] = st.selectbox(
 
 data["rooms"] = st.number_input("Rooms", min_value=1, value=1, help="Number of rooms")
 
-area = st.number_input("Area", min_value=1, value=1, help="The area of the Flat")
+data["area"] = st.number_input(
+    "Area", min_value=1, value=1, help="The area of the Flat"
+)
 
 
 if st.button("Get predicted monthly rent"):

@@ -1,4 +1,4 @@
-from io import StringIO
+from io import BytesIO, StringIO
 from os import getenv
 
 import folium
@@ -20,11 +20,14 @@ def read_geo_json():
     )
     r = requests.get(url)
 
-    geo_df = (
-        gpd.read_file(r.text, driver="GeoJSON")
-        .drop(columns=["Quelle_Ein", "Stand_Gren", "Stadtbezir", "Stadtteilc"])
-        .rename(columns={"Stadtteil": "district_number"})
-    )
+    if r.status_code == 200:
+        geo_df = (
+            gpd.read_file(BytesIO(r.content), driver="GeoJSON")
+            .drop(columns=["Quelle_Ein", "Stand_Gren", "Stadtbezir", "Stadtteilc"])
+            .rename(columns={"Stadtteil": "district_number"})
+        )
+    else:
+        raise Exception("Request was not succesful.")
     return geo_df
 
 

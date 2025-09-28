@@ -28,8 +28,9 @@ def extract_data() -> pd.DataFrame:
     Extract train data from Rest Api
     :return: pd.DataFrame with the data
     """
+    url = f"http://{API_HOST}:{API_PORT}/ml/train-data"
     r = get(
-        url=f"http://{API_HOST}:{API_PORT}/ml/train-data",
+        url=url,
         headers={"x-api-key": API_KEY},
     )
     df = pd.read_json(StringIO(r.text))

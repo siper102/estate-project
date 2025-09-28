@@ -14,6 +14,7 @@ district_names: list[str] = requests.get(
 class EstateInput(BaseModel):
     district_name: str
     rooms: float = Field(ge=1)
+    area: float
 
     @field_validator("district_name")
     @classmethod

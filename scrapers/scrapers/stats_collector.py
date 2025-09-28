@@ -19,8 +19,9 @@ class StatsPersistence(StatsCollector):
             finished_reason=stats.get("finish_reason"),
             items_scraped=stats.get("item_scraped_count", 0),
         )
+        url = f"http://{api_host}:{api_port}/scraper/scraper-stats"
         requests.post(
-            url=f"http://{api_host}:{api_port}/scraper/scraper-stats",
+            url=url,
             json=stats_model,
             headers={"x-api-key": api_key},
         )
